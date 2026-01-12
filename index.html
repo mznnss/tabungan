@@ -2,91 +2,309 @@
 <html lang="id">
 <head>
   <meta charset="utf-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Budget Harian (Auto Hitung)</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+  <title>Budget Harian + 3 Bank + Freelance + Emas</title>
   <style>
     :root{
       --bg:#0b0f19; --card:#111a2e; --bd:#223056; --txt:#e9eefc; --mut:#a9b7df;
-      --ok:#2aff8a; --bad:#ff7b7b;
+      --ok:#2aff8a; --bad:#ff7b7b; --accent:#2a4bff; --warn:#ffd56a;
+      --shadow: 0 10px 30px rgba(0,0,0,.25);
     }
     *{box-sizing:border-box;font-family:system-ui,Arial,sans-serif}
     body{margin:0;background:var(--bg);color:var(--txt)}
-    .wrap{max-width:980px;margin:0 auto;padding:16px}
-    .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
-    .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
-    h1{font-size:18px;margin:0}
-    .muted{color:var(--mut);font-size:13px}
+    .wrap{max-width:980px;margin:0 auto;padding:12px;padding-bottom:28px}
+    .card{
+      background:var(--card);border:1px solid var(--bd);border-radius:16px;padding:14px;
+      margin-bottom:12px; box-shadow: var(--shadow);
+    }
+    .stickyBar{
+      position: sticky; top: 0; z-index: 10;
+      padding: 10px 0; background: linear-gradient(to bottom, rgba(11,15,25,.96), rgba(11,15,25,.72), rgba(11,15,25,0));
+      backdrop-filter: blur(10px);
+    }
+    .top{display:flex;align-items:flex-start;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    h1{font-size:17px;margin:0}
+    h2{font-size:15px;margin:0 0 10px}
+    .muted{color:var(--mut);font-size:13px;line-height:1.35}
     .row{display:flex;gap:12px;flex-wrap:wrap}
     .row > div{flex:1;min-width:160px}
+    .grid2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+    .grid3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px}
     label{display:block;font-size:12px;color:var(--mut);margin:8px 0 6px}
     input, select{
-      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);
-      background:#0f162a;color:var(--txt)
+      width:100%;padding:12px 12px;border-radius:14px;border:1px solid var(--bd);
+      background:#0f162a;color:var(--txt); outline:none;
     }
+    input:focus{border-color: color-mix(in srgb, var(--accent) 55%, var(--bd))}
     button{
-      padding:10px 12px;border-radius:12px;border:1px solid #2b3d6b;
-      background:#172446;color:var(--txt);cursor:pointer
+      padding:12px 12px;border-radius:14px;border:1px solid #2b3d6b;
+      background:#172446;color:var(--txt);cursor:pointer;
+      transition: transform .05s ease, filter .15s ease;
+      width:auto;
     }
+    button:active{transform: scale(.99)}
     button:hover{filter:brightness(1.08)}
-    .primary{border-color:#2a4bff66;background:#2a4bff1a}
-    .danger{border-color:#ff2a2a66;background:#ff2a2a1a}
-    .badge{padding:3px 8px;border-radius:999px;border:1px solid var(--bd);font-size:12px}
+    .primary{border-color: color-mix(in srgb, var(--accent) 45%, #2b3d6b); background: color-mix(in srgb, var(--accent) 12%, #172446)}
+    .danger{border-color: color-mix(in srgb, #ff2a2a 45%, #2b3d6b); background: color-mix(in srgb, #ff2a2a 12%, #172446)}
+    .warning{border-color: color-mix(in srgb, var(--warn) 45%, #2b3d6b); background: color-mix(in srgb, var(--warn) 10%, #172446)}
+    .badge{padding:4px 10px;border-radius:999px;border:1px solid var(--bd);font-size:12px;white-space:nowrap}
     .ok{border-color:color-mix(in srgb, var(--ok) 40%, transparent);background:color-mix(in srgb, var(--ok) 12%, transparent)}
     .bad{border-color:color-mix(in srgb, var(--bad) 40%, transparent);background:color-mix(in srgb, var(--bad) 12%, transparent)}
-    table{width:100%;border-collapse:collapse}
+    .warn{border-color:color-mix(in srgb, var(--warn) 40%, transparent);background:color-mix(in srgb, var(--warn) 10%, transparent)}
+    .pill{font-size:11px;padding:3px 8px;border-radius:999px;border:1px solid var(--bd);color:var(--mut)}
+    .miniCard{border:1px solid var(--bd);border-radius:14px;padding:12px;background:#0f162a}
+    .miniTitle{display:flex;align-items:center;justify-content:space-between;gap:8px;margin-bottom:6px}
+    .miniTitle b{font-size:13px}
+    .list{margin:8px 0 0;padding-left:18px;color:var(--mut);font-size:13px;line-height:1.45}
+    .hint{font-size:12px;color:var(--mut);margin-top:10px}
+    hr{border:none;border-top:1px solid var(--bd);margin:14px 0}
+    .kpiRow{display:flex;gap:10px;align-items:stretch;flex-wrap:wrap}
+    .kpiBox{
+      flex:1; min-width:160px;
+      border:1px solid var(--bd); border-radius:14px; padding:12px; background:#0f162a;
+    }
+    .kpiTitle{font-size:12px;color:var(--mut);margin-bottom:6px}
+    .kpiVal{font-size:18px;font-weight:800}
+    .kpiVal.badTxt{color:var(--bad)}
+    .kpiVal.okTxt{color:#c8ffd9}
+    .progress{
+      height:10px; border-radius:999px; background:#0b0f19; border:1px solid var(--bd); overflow:hidden;
+    }
+    .bar{height:100%; width:0%;}
+    .bar.ok{background: color-mix(in srgb, var(--ok) 45%, var(--accent))}
+    .bar.warn{background: color-mix(in srgb, var(--warn) 55%, var(--accent))}
+    .bar.bad{background: color-mix(in srgb, var(--bad) 55%, var(--accent))}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    table{width:100%;border-collapse:collapse;min-width:820px}
     th,td{padding:10px;border-bottom:1px solid var(--bd);text-align:left}
     tr:hover{background:#0f162a;cursor:pointer}
-    .kpi{font-size:18px;font-weight:800}
-    .kpi.badTxt{color:var(--bad)}
-    .kpi.okTxt{color:#c8ffd9}
-    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
-    hr{border:none;border-top:1px solid var(--bd);margin:14px 0}
+    .tableWrap{overflow:auto;border:1px solid var(--bd);border-radius:14px}
+    .sep{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .right{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+    .small{font-size:12px;color:var(--mut)}
+    .mono{font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace}
+
+    @media (max-width: 820px){
+      .grid3{grid-template-columns:1fr}
+    }
+    @media (max-width: 640px){
+      .wrap{padding:12px}
+      .row > div{min-width: 100%}
+      .grid2{grid-template-columns:1fr}
+      .actions button{flex:1; min-width: 140px}
+      button{width:100%}
+      .right{width:100%}
+    }
   </style>
 </head>
 <body>
 <div class="wrap">
 
-  <div class="card top">
-    <div>
-      <h1>Budget Tracker Harian (Jakarta)</h1>
-      <div class="muted">Simpan otomatis di perangkat (LocalStorage). Klik tabel untuk edit.</div>
-    </div>
-    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
-      <span id="statusBadge" class="badge ok">AMAN</span>
-      <button id="exportBtn" class="primary">Export CSV</button>
-      <button id="clearAllBtn" class="danger">Hapus Semua Data</button>
-    </div>
-  </div>
-
-  <div class="card">
-    <div class="row">
+  <!-- Sticky header -->
+  <div class="stickyBar">
+    <div class="card top" style="margin-bottom:10px">
       <div>
-        <label>Budget Harian (default)</label>
-        <input id="defaultBudget" type="number" value="105000" />
-        <div class="muted">Dipakai otomatis saat input hari baru.</div>
+        <h1>Budget Harian + Dashboard 3 Bank (Mahasiswa Jakarta)</h1>
+        <div class="muted">Simpan di perangkat (LocalStorage) • Freelance auto-bagi • Progress dana darurat & emas.</div>
       </div>
-      <div>
-        <label>Pilih Bulan (Riwayat)</label>
-        <input id="monthPick" type="month" />
-        <div class="muted">Filter tabel & rekap.</div>
-      </div>
-      <div>
-        <label>Rekap Bulan Ini</label>
-        <div class="muted">Total: <b id="monthTotal">Rp0</b> • Rata-rata: <b id="monthAvg">Rp0</b></div>
-        <div class="muted">Terbesar: <b id="monthTop">-</b></div>
+      <div class="right">
+        <span id="statusBadge" class="badge ok">AMAN</span>
+        <button id="exportBtn" class="primary">Export CSV</button>
+        <button id="exportAllBtn" class="warning">Export Semua (CSV)</button>
+        <button id="resetAllBtn" class="danger">Reset Semua</button>
       </div>
     </div>
   </div>
 
+  <!-- Settings -->
   <div class="card">
     <div class="top">
       <div>
-        <h1>Input Harian</h1>
-        <div class="muted">
-          Total: <b id="kpiTotal">Rp0</b> • Sisa: <b id="kpiSisa">Rp0</b>
+        <h2>⚙️ Pengaturan</h2>
+        <div class="muted">Ubah ini sekali, nanti kepakai terus.</div>
+      </div>
+      <span class="badge warn">HP-friendly</span>
+    </div>
+
+    <div class="grid3" style="margin-top:10px">
+      <div class="miniCard">
+        <div class="miniTitle"><b>Budget Harian Default</b><span class="pill">Bank 1</span></div>
+        <label>Budget default (Rp)</label>
+        <input id="defaultBudget" type="number" value="105000" />
+        <div class="hint">Dipakai otomatis saat input hari baru.</div>
+      </div>
+
+      <div class="miniCard">
+        <div class="miniTitle"><b>Skema Freelance Mingguan</b><span class="pill">Auto bagi</span></div>
+        <label>Freelance per minggu (Rp)</label>
+        <input id="freelanceWeekly" type="number" value="500000" />
+        <div class="grid2" style="margin-top:10px">
+          <div>
+            <label>Ke Bank 2 (Rp)</label>
+            <input id="allocB2" type="number" value="200000" />
+          </div>
+          <div>
+            <label>Ke Bank 3 (Rp)</label>
+            <input id="allocB3" type="number" value="250000" />
+          </div>
         </div>
+        <label style="margin-top:10px">Reward/Buffer (Rp) — otomatis sisa</label>
+        <input id="allocReward" type="number" value="50000" />
+        <div class="hint">Tip: Bank 2 & 3 harus kebagian dulu.</div>
+      </div>
+
+      <div class="miniCard">
+        <div class="miniTitle"><b>Target Dana Darurat & Emas</b><span class="pill">Progress</span></div>
+        <label>Target dana darurat (Rp)</label>
+        <input id="emergencyTarget" type="number" value="10000000" />
+        <label>Estimasi harga emas 1 gram (Rp)</label>
+        <input id="goldPrice" type="number" value="1200000" />
+        <div class="hint">Harga emas cuma buat patokan “progress 1 gram/bulan”.</div>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="saveSettingsBtn" class="primary">Simpan Pengaturan</button>
+      <button id="resetSettingsBtn" class="warning">Kembalikan Default</button>
+    </div>
+    <div class="hint">Kalau kamu ganti angka, klik “Simpan Pengaturan”.</div>
+  </div>
+
+  <!-- 3 Bank dashboard -->
+  <div class="card">
+    <div class="top">
+      <div>
+        <h2>🏦 Dashboard 3 Bank</h2>
+        <div class="muted">Saldo ini “virtual tracker” biar kamu disiplin. (Bukan saldo bank asli).</div>
+      </div>
+      <div class="sep">
+        <button id="addFreelanceBtn" class="primary">+ Input Freelance Mingguan</button>
+        <button id="withdrawRewardBtn" class="warning">Ambil Reward/Buffer</button>
+      </div>
+    </div>
+
+    <div class="grid3" style="margin-top:10px">
+      <div class="miniCard">
+        <div class="miniTitle"><b>🟦 Bank 1 — Operasional</b><span class="pill">Harian</span></div>
+        <div class="muted">Saldo tracker</div>
+        <div class="kpiVal" id="balB1">Rp0</div>
+        <div class="hint">Dipakai untuk pengeluaran harian. (Opsional: kamu isi “Uang Bulanan” di bawah.)</div>
+      </div>
+
+      <div class="miniCard">
+        <div class="miniTitle"><b>🟩 Bank 2 — Tabungan/Darurat</b><span class="pill">Safety</span></div>
+        <div class="muted">Saldo tracker</div>
+        <div class="kpiVal" id="balB2">Rp0</div>
+        <div class="hint">
+          Progress dana darurat:
+          <b id="emergencyProgressText">0%</b>
+        </div>
+        <div class="progress"><div id="emergencyBar" class="bar ok"></div></div>
+      </div>
+
+      <div class="miniCard">
+        <div class="miniTitle"><b>🟨 Bank 3 — Tujuan/Investasi</b><span class="pill">Emas</span></div>
+        <div class="muted">Saldo tracker</div>
+        <div class="kpiVal" id="balB3">Rp0</div>
+        <div class="hint">
+          Progress emas bulan ini:
+          <b id="goldProgressText">0%</b>
+        </div>
+        <div class="progress"><div id="goldBar" class="bar warn"></div></div>
+        <div class="hint small">Target: ~1 gram/bulan (berdasarkan “Estimasi harga emas”).</div>
+      </div>
+    </div>
+
+    <hr/>
+
+    <div class="grid2">
+      <div class="miniCard">
+        <div class="miniTitle"><b>➕ Tambah Uang Bulanan ke Bank 1</b><span class="pill">Manual</span></div>
+        <label>Nominal (Rp)</label>
+        <input id="monthlyTopup" type="number" value="3000000" />
+        <button id="addMonthlyBtn" class="primary" style="margin-top:10px">Tambah ke Bank 1</button>
+        <div class="hint">Ini biar tracker saldo Bank 1 sesuai “uang bulanan 3jt” kamu.</div>
+      </div>
+
+      <div class="miniCard">
+        <div class="miniTitle"><b>🧹 Penyesuaian Saldo (Kalau mau)</b><span class="pill">Advanced</span></div>
+        <div class="row">
+          <div>
+            <label>Set saldo Bank 1 (Rp)</label>
+            <input id="setB1" type="number" value="0" />
+          </div>
+          <div>
+            <label>Set saldo Bank 2 (Rp)</label>
+            <input id="setB2" type="number" value="0" />
+          </div>
+        </div>
+        <div class="row">
+          <div>
+            <label>Set saldo Bank 3 (Rp)</label>
+            <input id="setB3" type="number" value="0" />
+          </div>
+          <div style="display:flex;align-items:flex-end">
+            <button id="applySetBalanceBtn" class="warning">Terapkan</button>
+          </div>
+        </div>
+        <div class="hint">Kalau kamu sudah punya saldo real, isi di sini biar tracker nyambung.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Month + Summary -->
+  <div class="card">
+    <div class="top">
+      <div>
+        <h2>📌 Rekap Bulanan</h2>
+        <div class="muted">Filter & rekap pengeluaran harian.</div>
+      </div>
+      <span class="badge">Klik baris tabel = edit</span>
+    </div>
+
+    <div class="row" style="margin-top:10px">
+      <div>
+        <label>Pilih Bulan</label>
+        <input id="monthPick" type="month" />
+      </div>
+      <div>
+        <label>Total Bulan Ini</label>
+        <div class="kpiVal" id="monthTotal">Rp0</div>
+        <div class="muted">Rata-rata/hari: <b id="monthAvg">Rp0</b></div>
+      </div>
+      <div>
+        <label>Kategori Terbesar</label>
+        <div class="kpiVal" style="font-size:16px" id="monthTop">-</div>
+        <div class="muted">Makan, bensin, pulsa, kuliah, jajan.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Daily input -->
+  <div class="card">
+    <div class="top">
+      <div>
+        <h2>✍️ Input Pengeluaran Harian</h2>
+        <div class="muted">Auto hitung total & sisa. Saat “Simpan”, otomatis mengurangi saldo Bank 1 (tracker).</div>
       </div>
       <div class="muted">Mode: <b id="modeText">Tambah</b></div>
+    </div>
+
+    <div style="height:10px"></div>
+
+    <div class="kpiRow">
+      <div class="kpiBox">
+        <div class="kpiTitle">Total Hari Ini</div>
+        <div id="kpiTotal" class="kpiVal">Rp0</div>
+      </div>
+      <div class="kpiBox">
+        <div class="kpiTitle">Sisa Budget</div>
+        <div id="kpiSisa" class="kpiVal okTxt">Rp0</div>
+      </div>
+      <div class="kpiBox">
+        <div class="kpiTitle">Saldo Bank 1 (Tracker)</div>
+        <div id="kpiB1" class="kpiVal mono">Rp0</div>
+      </div>
     </div>
 
     <hr/>
@@ -98,30 +316,30 @@
       </div>
       <div>
         <label>Budget (hari ini)</label>
-        <input id="budget" type="number" />
+        <input id="budget" type="number" inputmode="numeric" />
       </div>
     </div>
 
     <div class="row">
       <div>
         <label>Makan</label>
-        <input id="makan" type="number" value="0"/>
+        <input id="makan" type="number" inputmode="numeric" value="0"/>
       </div>
       <div>
         <label>Bensin</label>
-        <input id="bensin" type="number" value="0"/>
+        <input id="bensin" type="number" inputmode="numeric" value="0"/>
       </div>
       <div>
         <label>Pulsa/Data</label>
-        <input id="pulsa" type="number" value="0"/>
+        <input id="pulsa" type="number" inputmode="numeric" value="0"/>
       </div>
       <div>
         <label>Kuliah</label>
-        <input id="kuliah" type="number" value="0"/>
+        <input id="kuliah" type="number" inputmode="numeric" value="0"/>
       </div>
       <div>
         <label>Jajan</label>
-        <input id="jajan" type="number" value="0"/>
+        <input id="jajan" type="number" inputmode="numeric" value="0"/>
       </div>
     </div>
 
@@ -131,37 +349,52 @@
       <button id="deleteBtn" class="danger" style="display:none">Hapus Hari Ini</button>
     </div>
 
-    <div class="muted" style="margin-top:10px">
-      Tips: kebobolan? besok targetkan total lebih kecil supaya nutup.
+    <div class="hint">
+      Patokan kamu: makan 50–80rb/hari + bensin 25rb/hari. Kalau kebobolan, besok tekan jajan/opsional supaya nutup.
     </div>
   </div>
 
+  <!-- History -->
   <div class="card">
-    <h1>Riwayat Harian</h1>
-    <div class="muted">Klik baris untuk edit data hari itu.</div>
+    <div class="top">
+      <div>
+        <h2>📅 Riwayat Harian</h2>
+        <div class="muted">Di HP bisa geser tabel kanan-kiri.</div>
+      </div>
+      <span class="badge">Auto hitung</span>
+    </div>
 
     <div style="height:10px"></div>
 
-    <table>
-      <thead>
-        <tr>
-          <th>Tanggal</th>
-          <th>Budget</th>
-          <th>Total</th>
-          <th>Sisa</th>
-          <th>Status</th>
-        </tr>
-      </thead>
-      <tbody id="tbody">
-        <tr><td colspan="5" class="muted">Belum ada data.</td></tr>
-      </tbody>
-    </table>
+    <div class="tableWrap">
+      <table>
+        <thead>
+          <tr>
+            <th>Tanggal</th>
+            <th>Budget</th>
+            <th>Total</th>
+            <th>Sisa</th>
+            <th>Status</th>
+            <th class="mono">B1 After (tracker)</th>
+          </tr>
+        </thead>
+        <tbody id="tbody">
+          <tr><td colspan="6" class="muted">Belum ada data.</td></tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="hint">
+      Catatan: “B1 After” adalah saldo Bank 1 tracker setelah pengeluaran hari itu (buat kontrol biar gak jebol).
+    </div>
   </div>
 
 </div>
 
 <script>
-  // ---------- Utils ----------
+  // ===========================
+  // Utils
+  // ===========================
   const rupiah = (x) => new Intl.NumberFormat('id-ID').format(Number(x||0));
   const n = (x) => {
     const v = Number(x);
@@ -174,25 +407,117 @@
   };
   const monthKey = (dateISO) => (dateISO||"").slice(0,7);
 
-  // ---------- Storage ----------
-  // data shape: { defaultBudget, entries: { "YYYY-MM-DD": {date,budget,makan,bensin,pulsa,kuliah,jajan,total,sisa} } }
-  const KEY = "budget_tracker_v1";
+  // ===========================
+  // Storage
+  // ===========================
+  /**
+   * store:
+   * {
+   *  settings: {
+   *    defaultBudget, freelanceWeekly, allocB2, allocB3, allocReward, emergencyTarget, goldPrice
+   *  },
+   *  balances: { b1, b2, b3, reward },
+   *  goldMonth: { "YYYY-MM": investedAmount }, // amount put into gold this month (for progress)
+   *  entries: {
+   *    "YYYY-MM-DD": {date, budget, makan, bensin, pulsa, kuliah, jajan, total, sisa, b1After}
+   *  },
+   *  ledger: [ {ts, type, note, delta:{b1,b2,b3,reward}, monthKey, dateISO } ]
+   * }
+   */
+  const KEY = "budget_tracker_allin_v1";
+
+  const DEFAULT_STORE = () => ({
+    settings: {
+      defaultBudget: 105000,
+      freelanceWeekly: 500000,
+      allocB2: 200000,
+      allocB3: 250000,
+      allocReward: 50000,
+      emergencyTarget: 10000000,
+      goldPrice: 1200000,
+    },
+    balances: { b1: 0, b2: 0, b3: 0, reward: 0 },
+    goldMonth: {},
+    entries: {},
+    ledger: [],
+  });
+
   function loadStore(){
     const raw = localStorage.getItem(KEY);
-    if(!raw){
-      return { defaultBudget: 105000, entries: {} };
+    if(!raw) return DEFAULT_STORE();
+    try {
+      const parsed = JSON.parse(raw);
+      // merge defaults for missing keys
+      const def = DEFAULT_STORE();
+      return {
+        ...def,
+        ...parsed,
+        settings: { ...def.settings, ...(parsed.settings||{}) },
+        balances: { ...def.balances, ...(parsed.balances||{}) },
+        goldMonth: { ...(parsed.goldMonth||{}) },
+        entries: { ...(parsed.entries||{}) },
+        ledger: Array.isArray(parsed.ledger) ? parsed.ledger : [],
+      };
+    } catch {
+      return DEFAULT_STORE();
     }
-    try { return JSON.parse(raw); } catch { return { defaultBudget: 105000, entries: {} }; }
   }
-  function saveStore(store){
-    localStorage.setItem(KEY, JSON.stringify(store));
-  }
+  function saveStore(store){ localStorage.setItem(KEY, JSON.stringify(store)); }
+  let store = loadStore();
 
-  // ---------- DOM ----------
+  // ===========================
+  // DOM
+  // ===========================
   const el = (id) => document.getElementById(id);
 
+  // header
+  const statusBadgeEl = el("statusBadge");
+  const exportBtn = el("exportBtn");
+  const exportAllBtn = el("exportAllBtn");
+  const resetAllBtn = el("resetAllBtn");
+
+  // settings
   const defaultBudgetEl = el("defaultBudget");
+  const freelanceWeeklyEl = el("freelanceWeekly");
+  const allocB2El = el("allocB2");
+  const allocB3El = el("allocB3");
+  const allocRewardEl = el("allocReward");
+  const emergencyTargetEl = el("emergencyTarget");
+  const goldPriceEl = el("goldPrice");
+  const saveSettingsBtn = el("saveSettingsBtn");
+  const resetSettingsBtn = el("resetSettingsBtn");
+
+  // bank dashboard
+  const balB1El = el("balB1");
+  const balB2El = el("balB2");
+  const balB3El = el("balB3");
+  const emergencyProgressTextEl = el("emergencyProgressText");
+  const emergencyBarEl = el("emergencyBar");
+  const goldProgressTextEl = el("goldProgressText");
+  const goldBarEl = el("goldBar");
+
+  const addFreelanceBtn = el("addFreelanceBtn");
+  const withdrawRewardBtn = el("withdrawRewardBtn");
+
+  const monthlyTopupEl = el("monthlyTopup");
+  const addMonthlyBtn = el("addMonthlyBtn");
+
+  const setB1El = el("setB1");
+  const setB2El = el("setB2");
+  const setB3El = el("setB3");
+  const applySetBalanceBtn = el("applySetBalanceBtn");
+
+  // month + summary
   const monthPickEl = el("monthPick");
+  const monthTotalEl = el("monthTotal");
+  const monthAvgEl = el("monthAvg");
+  const monthTopEl = el("monthTop");
+
+  // daily input
+  const modeTextEl = el("modeText");
+  const kpiTotalEl = el("kpiTotal");
+  const kpiSisaEl = el("kpiSisa");
+  const kpiB1El = el("kpiB1");
 
   const dateEl = el("date");
   const budgetEl = el("budget");
@@ -202,39 +527,112 @@
   const kuliahEl = el("kuliah");
   const jajanEl = el("jajan");
 
-  const kpiTotalEl = el("kpiTotal");
-  const kpiSisaEl = el("kpiSisa");
-  const statusBadgeEl = el("statusBadge");
-  const modeTextEl = el("modeText");
-
-  const monthTotalEl = el("monthTotal");
-  const monthAvgEl = el("monthAvg");
-  const monthTopEl = el("monthTop");
-
-  const tbodyEl = el("tbody");
-
   const saveBtn = el("saveBtn");
   const resetBtn = el("resetBtn");
   const deleteBtn = el("deleteBtn");
-  const exportBtn = el("exportBtn");
-  const clearAllBtn = el("clearAllBtn");
 
-  // ---------- State ----------
-  let store = loadStore();
+  // table
+  const tbodyEl = el("tbody");
+
+  // ===========================
+  // State
+  // ===========================
   let selectedDate = null;
 
-  // init inputs
-  defaultBudgetEl.value = store.defaultBudget ?? 105000;
-  dateEl.value = todayISO();
-  monthPickEl.value = monthKey(todayISO());
+  // ===========================
+  // Helpers: ledger & balances
+  // ===========================
+  function pushLedger({ type, note, delta, dateISO=null }) {
+    const ts = Date.now();
+    store.ledger.push({
+      ts,
+      type,
+      note,
+      delta: { b1: n(delta.b1), b2: n(delta.b2), b3: n(delta.b3), reward: n(delta.reward) },
+      dateISO,
+      monthKey: dateISO ? monthKey(dateISO) : monthKey(todayISO()),
+    });
+  }
+
+  function applyDelta(delta){
+    store.balances.b1 += n(delta.b1);
+    store.balances.b2 += n(delta.b2);
+    store.balances.b3 += n(delta.b3);
+    store.balances.reward += n(delta.reward);
+  }
+
+  function clampNonNegative(){
+    // allow negative if you want, but usually keep reward non-negative
+    if (store.balances.reward < 0) store.balances.reward = 0;
+  }
+
+  function goldMonthAmount(mk){
+    return n(store.goldMonth[mk] || 0);
+  }
+  function addGoldMonth(mk, amount){
+    store.goldMonth[mk] = goldMonthAmount(mk) + n(amount);
+  }
+
+  // ===========================
+  // UI Render
+  // ===========================
+  function loadSettingsToUI(){
+    const s = store.settings;
+    defaultBudgetEl.value = s.defaultBudget;
+    freelanceWeeklyEl.value = s.freelanceWeekly;
+    allocB2El.value = s.allocB2;
+    allocB3El.value = s.allocB3;
+    allocRewardEl.value = s.allocReward;
+    emergencyTargetEl.value = s.emergencyTarget;
+    goldPriceEl.value = s.goldPrice;
+  }
+
+  function updateBalancesUI(){
+    balB1El.textContent = "Rp" + rupiah(store.balances.b1);
+    balB2El.textContent = "Rp" + rupiah(store.balances.b2);
+    balB3El.textContent = "Rp" + rupiah(store.balances.b3);
+
+    // emergency progress
+    const target = Math.max(1, n(store.settings.emergencyTarget));
+    const pct = Math.min(100, Math.round((store.balances.b2 / target) * 100));
+    emergencyProgressTextEl.textContent = pct + "%";
+    emergencyBarEl.style.width = pct + "%";
+    emergencyBarEl.className = "bar " + (pct >= 70 ? "ok" : pct >= 35 ? "warn" : "bad");
+
+    // gold progress for current month
+    const mk = monthPickEl.value || monthKey(todayISO());
+    const goldPrice = Math.max(1, n(store.settings.goldPrice));
+    const invested = goldMonthAmount(mk); // amount allocated to gold this month
+    const gpct = Math.min(100, Math.round((invested / goldPrice) * 100));
+    goldProgressTextEl.textContent = gpct + "% (Rp" + rupiah(invested) + " / Rp" + rupiah(goldPrice) + ")";
+    goldBarEl.style.width = gpct + "%";
+    goldBarEl.className = "bar " + (gpct >= 85 ? "ok" : gpct >= 45 ? "warn" : "bad");
+
+    // kpi bank 1
+    kpiB1El.textContent = "Rp" + rupiah(store.balances.b1);
+  }
+
+  function computeKPI(){
+    const budget = n(budgetEl.value);
+    const total = n(makanEl.value)+n(bensinEl.value)+n(pulsaEl.value)+n(kuliahEl.value)+n(jajanEl.value);
+    const sisa = budget - total;
+
+    kpiTotalEl.textContent = "Rp" + rupiah(total);
+    kpiSisaEl.textContent = "Rp" + rupiah(sisa);
+
+    const bad = sisa < 0;
+    statusBadgeEl.textContent = bad ? "KEBOBOLAN" : "AMAN";
+    statusBadgeEl.className = "badge " + (bad ? "bad" : "ok");
+    kpiSisaEl.className = "kpiVal " + (bad ? "badTxt" : "okTxt");
+  }
 
   function setFormDefaults(){
     selectedDate = null;
     modeTextEl.textContent = "Tambah";
     deleteBtn.style.display = "none";
 
-    const d = dateEl.value || todayISO();
-    budgetEl.value = store.defaultBudget ?? 105000;
+    dateEl.value = todayISO();
+    budgetEl.value = n(store.settings.defaultBudget);
 
     makanEl.value = 0;
     bensinEl.value = 0;
@@ -265,57 +663,7 @@
     computeKPI();
   }
 
-  function computeKPI(){
-    const budget = n(budgetEl.value);
-    const total = n(makanEl.value)+n(bensinEl.value)+n(pulsaEl.value)+n(kuliahEl.value)+n(jajanEl.value);
-    const sisa = budget - total;
-
-    kpiTotalEl.textContent = "Rp" + rupiah(total);
-    kpiSisaEl.textContent = "Rp" + rupiah(sisa);
-
-    const bad = sisa < 0;
-    statusBadgeEl.textContent = bad ? "KEBOBOLAN" : "AMAN";
-    statusBadgeEl.className = "badge " + (bad ? "bad" : "ok");
-    kpiSisaEl.className = "kpi " + (bad ? "badTxt" : "okTxt");
-  }
-
-  function saveEntry(){
-    const date = dateEl.value;
-    if(!date){ alert("Tanggal wajib diisi"); return; }
-
-    const budget = n(budgetEl.value);
-    const makan = n(makanEl.value);
-    const bensin = n(bensinEl.value);
-    const pulsa = n(pulsaEl.value);
-    const kuliah = n(kuliahEl.value);
-    const jajan = n(jajanEl.value);
-
-    const total = makan+bensin+pulsa+kuliah+jajan;
-    const sisa = budget-total;
-
-    store.entries[date] = { date, budget, makan, bensin, pulsa, kuliah, jajan, total, sisa };
-    saveStore(store);
-
-    // auto switch filter month to saved entry month
-    monthPickEl.value = monthKey(date);
-    render();
-    loadEntryToForm(date);
-  }
-
-  function deleteEntry(){
-    const date = dateEl.value;
-    if(!date) return;
-    if(!store.entries[date]) return;
-    if(!confirm("Hapus data tanggal " + date + "?")) return;
-
-    delete store.entries[date];
-    saveStore(store);
-    render();
-    setFormDefaults();
-  }
-
-  function render(){
-    // render table by selected month
+  function renderMonth(){
     const mk = monthPickEl.value || monthKey(todayISO());
     const all = Object.values(store.entries || {});
     const rows = all
@@ -326,7 +674,7 @@
     tbodyEl.innerHTML = "";
     if(rows.length === 0){
       const tr = document.createElement("tr");
-      tr.innerHTML = `<td colspan="5" class="muted">Belum ada data bulan ini.</td>`;
+      tr.innerHTML = `<td colspan="6" class="muted">Belum ada data bulan ini.</td>`;
       tbodyEl.appendChild(tr);
     } else {
       rows.forEach(e => {
@@ -338,8 +686,12 @@
           <td>Rp${rupiah(e.total)}</td>
           <td style="color:${bad ? "var(--bad)" : "var(--ok)"}">Rp${rupiah(e.sisa)}</td>
           <td><span class="badge ${bad ? "bad" : "ok"}">${bad ? "KEBOBOLAN" : "AMAN"}</span></td>
+          <td class="mono">Rp${rupiah(e.b1After ?? 0)}</td>
         `;
-        tr.addEventListener("click", () => loadEntryToForm(e.date));
+        tr.addEventListener("click", () => {
+          loadEntryToForm(e.date);
+          window.scrollTo({ top: 720, behavior: "smooth" });
+        });
         tbodyEl.appendChild(tr);
       });
     }
@@ -367,65 +719,288 @@
     ].sort((a,b)=>b[1]-a[1])[0];
 
     monthTopEl.textContent = rows.length ? `${cats[0]} (Rp${rupiah(cats[1])})` : "-";
+
+    updateBalancesUI();
   }
 
-  function exportCSV(){
+  function renderAll(){
+    loadSettingsToUI();
+    updateBalancesUI();
+    computeKPI();
+    renderMonth();
+  }
+
+  // ===========================
+  // Core actions
+  // ===========================
+  function saveSettings(){
+    store.settings.defaultBudget = n(defaultBudgetEl.value);
+    store.settings.freelanceWeekly = n(freelanceWeeklyEl.value);
+    store.settings.allocB2 = n(allocB2El.value);
+    store.settings.allocB3 = n(allocB3El.value);
+    store.settings.allocReward = n(allocRewardEl.value);
+    store.settings.emergencyTarget = n(emergencyTargetEl.value);
+    store.settings.goldPrice = n(goldPriceEl.value);
+
+    // sanity: keep allocation consistent
+    const fw = store.settings.freelanceWeekly;
+    const sumAlloc = store.settings.allocB2 + store.settings.allocB3 + store.settings.allocReward;
+    if (sumAlloc !== fw) {
+      // auto-fix: reward becomes remaining
+      store.settings.allocReward = Math.max(0, fw - (store.settings.allocB2 + store.settings.allocB3));
+      allocRewardEl.value = store.settings.allocReward;
+    }
+
+    saveStore(store);
+
+    // update form budget if not editing
+    if (!selectedDate) budgetEl.value = store.settings.defaultBudget;
+    saveStore(store);
+    renderAll();
+    alert("Pengaturan tersimpan ✅");
+  }
+
+  function resetSettings(){
+    const def = DEFAULT_STORE().settings;
+    store.settings = { ...def };
+    saveStore(store);
+    renderAll();
+    if (!selectedDate) budgetEl.value = store.settings.defaultBudget;
+    alert("Pengaturan dikembalikan ke default ✅");
+  }
+
+  function addMonthlyToB1(){
+    const amt = n(monthlyTopupEl.value);
+    if (amt <= 0) return alert("Nominal harus > 0");
+    applyDelta({ b1: amt, b2: 0, b3: 0, reward: 0 });
+    pushLedger({ type: "monthly_topup", note: "Uang bulanan ke Bank 1", delta: { b1: amt } });
+    saveStore(store);
+    renderAll();
+  }
+
+  function applySetBalances(){
+    store.balances.b1 = n(setB1El.value);
+    store.balances.b2 = n(setB2El.value);
+    store.balances.b3 = n(setB3El.value);
+    clampNonNegative();
+    pushLedger({ type: "set_balance", note: "Set saldo manual", delta: { b1: 0, b2: 0, b3: 0, reward: 0 } });
+    saveStore(store);
+    renderAll();
+    alert("Saldo tracker diterapkan ✅");
+  }
+
+  function addFreelanceWeekly(){
+    const fw = n(store.settings.freelanceWeekly);
+    const b2 = n(store.settings.allocB2);
+    const b3 = n(store.settings.allocB3);
+    const reward = n(store.settings.allocReward);
+
+    const sum = b2 + b3 + reward;
+    if (sum !== fw) {
+      return alert("Alokasi freelance belum sesuai total. Cek pengaturan dulu.");
+    }
+
+    // apply deltas: b2 +, b3 +, reward + (reward tracker)
+    applyDelta({ b1: 0, b2, b3, reward });
+    const mk = monthPickEl.value || monthKey(todayISO());
+    addGoldMonth(mk, b3); // treat Bank3 allocation as "gold progress amount" for current month
+
+    pushLedger({
+      type: "freelance_weekly",
+      note: `Freelance mingguan dibagi: B2 ${b2}, B3 ${b3}, Reward ${reward}`,
+      delta: { b2, b3, reward }
+    });
+
+    saveStore(store);
+    renderAll();
+    alert("Freelance masuk & kebagi otomatis ✅");
+  }
+
+  function withdrawReward(){
+    const cur = n(store.balances.reward);
+    if (cur <= 0) return alert("Reward/Buffer masih 0.");
+    const ask = prompt("Mau ambil berapa dari Reward/Buffer? (Rp)\nSaldo sekarang: " + cur);
+    if (ask === null) return;
+    const amt = n(ask);
+    if (amt <= 0) return alert("Nominal harus > 0");
+    if (amt > cur) return alert("Nominal melebihi saldo Reward/Buffer.");
+
+    // withdraw reward -> goes to Bank1 (for spending) OR just deduct? We'll move to B1 to spend.
+    applyDelta({ b1: amt, reward: -amt, b2: 0, b3: 0 });
+    pushLedger({ type: "reward_withdraw", note: "Ambil reward ke Bank1", delta: { b1: amt, reward: -amt } });
+    saveStore(store);
+    renderAll();
+  }
+
+  function saveDaily(){
+    const date = dateEl.value;
+    if(!date) return alert("Tanggal wajib diisi");
+
+    const budget = n(budgetEl.value);
+    const makan = n(makanEl.value);
+    const bensin = n(bensinEl.value);
+    const pulsa = n(pulsaEl.value);
+    const kuliah = n(kuliahEl.value);
+    const jajan = n(jajanEl.value);
+    const total = makan+bensin+pulsa+kuliah+jajan;
+    const sisa = budget-total;
+
+    // If editing existing entry, revert the previous spending effect first
+    const prev = store.entries[date];
+    if (prev) {
+      // revert bank1 effect by adding back prev.total
+      applyDelta({ b1: n(prev.total), b2: 0, b3: 0, reward: 0 });
+      pushLedger({ type: "daily_edit_revert", note: `Revert pengeluaran sebelumnya ${date}`, delta: { b1: n(prev.total) }, dateISO: date });
+    }
+
+    // Apply new spending: subtract total from Bank1 tracker
+    applyDelta({ b1: -total, b2: 0, b3: 0, reward: 0 });
+    const b1After = store.balances.b1;
+
+    store.entries[date] = { date, budget, makan, bensin, pulsa, kuliah, jajan, total, sisa, b1After };
+
+    pushLedger({ type: "daily_save", note: `Pengeluaran harian ${date}`, delta: { b1: -total }, dateISO: date });
+
+    saveStore(store);
+
+    // switch month filter to saved date month
+    monthPickEl.value = monthKey(date);
+
+    renderAll();
+    loadEntryToForm(date);
+  }
+
+  function deleteDaily(){
+    const date = dateEl.value;
+    if(!date) return;
+    const prev = store.entries[date];
+    if(!prev) return;
+    if(!confirm("Hapus data tanggal " + date + "?")) return;
+
+    // revert spending back to Bank1
+    applyDelta({ b1: n(prev.total), b2: 0, b3: 0, reward: 0 });
+    pushLedger({ type: "daily_delete", note: `Hapus pengeluaran ${date}`, delta: { b1: n(prev.total) }, dateISO: date });
+
+    delete store.entries[date];
+    saveStore(store);
+    renderAll();
+    setFormDefaults();
+  }
+
+  // ===========================
+  // Export
+  // ===========================
+  function exportCSVMonth(){
     const mk = monthPickEl.value || monthKey(todayISO());
     const rows = Object.values(store.entries || {})
       .filter(e => monthKey(e.date) === mk)
       .sort((a,b)=> (a.date > b.date ? 1 : -1));
 
-    if(rows.length === 0){ alert("Tidak ada data di bulan ini."); return; }
+    if(rows.length === 0) return alert("Tidak ada data di bulan ini.");
 
-    const header = ["date","budget","makan","bensin","pulsa","kuliah","jajan","total","sisa"];
+    const header = ["date","budget","makan","bensin","pulsa","kuliah","jajan","total","sisa","b1After"];
     const lines = [header.join(",")].concat(
       rows.map(e => header.map(k => String(e[k] ?? 0)).join(","))
     );
-    const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8;"});
-    const url = URL.createObjectURL(blob);
+    downloadCSV(lines.join("\n"), `budget_${mk}.csv`);
+  }
 
+  function exportCSVAll(){
+    const rows = Object.values(store.entries || {})
+      .sort((a,b)=> (a.date > b.date ? 1 : -1));
+
+    if(rows.length === 0) return alert("Tidak ada data sama sekali.");
+
+    const header = ["date","budget","makan","bensin","pulsa","kuliah","jajan","total","sisa","b1After"];
+    const lines = [header.join(",")].concat(
+      rows.map(e => header.map(k => String(e[k] ?? 0)).join(","))
+    );
+
+    // add balances snapshot & settings at top as comments-like lines
+    const s = store.settings;
+    const snap =
+      `# SETTINGS defaultBudget=${s.defaultBudget} freelanceWeekly=${s.freelanceWeekly} allocB2=${s.allocB2} allocB3=${s.allocB3} allocReward=${s.allocReward} emergencyTarget=${s.emergencyTarget} goldPrice=${s.goldPrice}\n` +
+      `# BALANCES b1=${store.balances.b1} b2=${store.balances.b2} b3=${store.balances.b3} reward=${store.balances.reward}\n`;
+    downloadCSV(snap + lines.join("\n"), `budget_all.csv`);
+  }
+
+  function downloadCSV(content, filename){
+    const blob = new Blob([content], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
     const a = document.createElement("a");
     a.href = url;
-    a.download = `budget_${mk}.csv`;
+    a.download = filename;
     document.body.appendChild(a);
     a.click();
     a.remove();
     URL.revokeObjectURL(url);
   }
 
-  // ---------- Events ----------
-  [budgetEl, makanEl, bensinEl, pulsaEl, kuliahEl, jajanEl].forEach(x => {
-    x.addEventListener("input", computeKPI);
-  });
-
-  defaultBudgetEl.addEventListener("change", () => {
-    store.defaultBudget = n(defaultBudgetEl.value);
+  // ===========================
+  // Reset all
+  // ===========================
+  function resetAll(){
+    if(!confirm("Reset semua data & pengaturan?")) return;
+    store = DEFAULT_STORE();
     saveStore(store);
-    if(!selectedDate) budgetEl.value = store.defaultBudget;
+    initUI();
+    alert("Semua data direset ✅");
+  }
+
+  // ===========================
+  // Init UI
+  // ===========================
+  function initUI(){
+    // month & date defaults
+    dateEl.value = todayISO();
+    monthPickEl.value = monthKey(todayISO());
+
+    loadSettingsToUI();
+    budgetEl.value = n(store.settings.defaultBudget);
+
+    // set adjustment inputs
+    setB1El.value = store.balances.b1;
+    setB2El.value = store.balances.b2;
+    setB3El.value = store.balances.b3;
+
     computeKPI();
+    renderMonth();
+  }
+
+  // ===========================
+  // Event wiring
+  // ===========================
+  [budgetEl, makanEl, bensinEl, pulsaEl, kuliahEl, jajanEl].forEach(x => x.addEventListener("input", computeKPI));
+
+  monthPickEl.addEventListener("change", () => {
+    renderMonth();
+    // update gold progress for selected month
+    updateBalancesUI();
   });
 
-  monthPickEl.addEventListener("change", render);
+  saveBtn.addEventListener("click", saveDaily);
+  resetBtn.addEventListener("click", setFormDefaults);
+  deleteBtn.addEventListener("click", deleteDaily);
 
-  saveBtn.addEventListener("click", saveEntry);
-  resetBtn.addEventListener("click", () => { setFormDefaults(); });
-  deleteBtn.addEventListener("click", deleteEntry);
+  exportBtn.addEventListener("click", exportCSVMonth);
+  exportAllBtn.addEventListener("click", exportCSVAll);
+  resetAllBtn.addEventListener("click", resetAll);
 
-  exportBtn.addEventListener("click", exportCSV);
+  saveSettingsBtn.addEventListener("click", saveSettings);
+  resetSettingsBtn.addEventListener("click", resetSettings);
 
-  clearAllBtn.addEventListener("click", () => {
-    if(!confirm("Yakin hapus semua data?")) return;
-    store = { defaultBudget: n(defaultBudgetEl.value) || 105000, entries: {} };
-    saveStore(store);
-    render();
-    setFormDefaults();
-  });
+  addMonthlyBtn.addEventListener("click", addMonthlyToB1);
+  applySetBalanceBtn.addEventListener("click", applySetBalances);
 
-  // ---------- Init ----------
-  // init budget to default
-  budgetEl.value = store.defaultBudget ?? 105000;
-  computeKPI();
-  render();
+  addFreelanceBtn.addEventListener("click", addFreelanceWeekly);
+  withdrawRewardBtn.addEventListener("click", withdrawReward);
+
+  // ===========================
+  // Boot
+  // ===========================
+  initUI();
+  setFormDefaults();
+  renderAll();
 </script>
 </body>
 </html>
