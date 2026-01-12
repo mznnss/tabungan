@@ -1,0 +1,431 @@
+<!doctype html>
+<html lang="id">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Budget Harian (Auto Hitung)</title>
+  <style>
+    :root{
+      --bg:#0b0f19; --card:#111a2e; --bd:#223056; --txt:#e9eefc; --mut:#a9b7df;
+      --ok:#2aff8a; --bad:#ff7b7b;
+    }
+    *{box-sizing:border-box;font-family:system-ui,Arial,sans-serif}
+    body{margin:0;background:var(--bg);color:var(--txt)}
+    .wrap{max-width:980px;margin:0 auto;padding:16px}
+    .card{background:var(--card);border:1px solid var(--bd);border-radius:14px;padding:14px;margin-bottom:12px}
+    .top{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+    h1{font-size:18px;margin:0}
+    .muted{color:var(--mut);font-size:13px}
+    .row{display:flex;gap:12px;flex-wrap:wrap}
+    .row > div{flex:1;min-width:160px}
+    label{display:block;font-size:12px;color:var(--mut);margin:8px 0 6px}
+    input, select{
+      width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--bd);
+      background:#0f162a;color:var(--txt)
+    }
+    button{
+      padding:10px 12px;border-radius:12px;border:1px solid #2b3d6b;
+      background:#172446;color:var(--txt);cursor:pointer
+    }
+    button:hover{filter:brightness(1.08)}
+    .primary{border-color:#2a4bff66;background:#2a4bff1a}
+    .danger{border-color:#ff2a2a66;background:#ff2a2a1a}
+    .badge{padding:3px 8px;border-radius:999px;border:1px solid var(--bd);font-size:12px}
+    .ok{border-color:color-mix(in srgb, var(--ok) 40%, transparent);background:color-mix(in srgb, var(--ok) 12%, transparent)}
+    .bad{border-color:color-mix(in srgb, var(--bad) 40%, transparent);background:color-mix(in srgb, var(--bad) 12%, transparent)}
+    table{width:100%;border-collapse:collapse}
+    th,td{padding:10px;border-bottom:1px solid var(--bd);text-align:left}
+    tr:hover{background:#0f162a;cursor:pointer}
+    .kpi{font-size:18px;font-weight:800}
+    .kpi.badTxt{color:var(--bad)}
+    .kpi.okTxt{color:#c8ffd9}
+    .actions{display:flex;gap:10px;flex-wrap:wrap;margin-top:12px}
+    hr{border:none;border-top:1px solid var(--bd);margin:14px 0}
+  </style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="card top">
+    <div>
+      <h1>Budget Tracker Harian (Jakarta)</h1>
+      <div class="muted">Simpan otomatis di perangkat (LocalStorage). Klik tabel untuk edit.</div>
+    </div>
+    <div style="display:flex;gap:8px;align-items:center;flex-wrap:wrap">
+      <span id="statusBadge" class="badge ok">AMAN</span>
+      <button id="exportBtn" class="primary">Export CSV</button>
+      <button id="clearAllBtn" class="danger">Hapus Semua Data</button>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="row">
+      <div>
+        <label>Budget Harian (default)</label>
+        <input id="defaultBudget" type="number" value="105000" />
+        <div class="muted">Dipakai otomatis saat input hari baru.</div>
+      </div>
+      <div>
+        <label>Pilih Bulan (Riwayat)</label>
+        <input id="monthPick" type="month" />
+        <div class="muted">Filter tabel & rekap.</div>
+      </div>
+      <div>
+        <label>Rekap Bulan Ini</label>
+        <div class="muted">Total: <b id="monthTotal">Rp0</b> • Rata-rata: <b id="monthAvg">Rp0</b></div>
+        <div class="muted">Terbesar: <b id="monthTop">-</b></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card">
+    <div class="top">
+      <div>
+        <h1>Input Harian</h1>
+        <div class="muted">
+          Total: <b id="kpiTotal">Rp0</b> • Sisa: <b id="kpiSisa">Rp0</b>
+        </div>
+      </div>
+      <div class="muted">Mode: <b id="modeText">Tambah</b></div>
+    </div>
+
+    <hr/>
+
+    <div class="row">
+      <div>
+        <label>Tanggal</label>
+        <input id="date" type="date" />
+      </div>
+      <div>
+        <label>Budget (hari ini)</label>
+        <input id="budget" type="number" />
+      </div>
+    </div>
+
+    <div class="row">
+      <div>
+        <label>Makan</label>
+        <input id="makan" type="number" value="0"/>
+      </div>
+      <div>
+        <label>Bensin</label>
+        <input id="bensin" type="number" value="0"/>
+      </div>
+      <div>
+        <label>Pulsa/Data</label>
+        <input id="pulsa" type="number" value="0"/>
+      </div>
+      <div>
+        <label>Kuliah</label>
+        <input id="kuliah" type="number" value="0"/>
+      </div>
+      <div>
+        <label>Jajan</label>
+        <input id="jajan" type="number" value="0"/>
+      </div>
+    </div>
+
+    <div class="actions">
+      <button id="saveBtn" class="primary">Simpan</button>
+      <button id="resetBtn">Reset</button>
+      <button id="deleteBtn" class="danger" style="display:none">Hapus Hari Ini</button>
+    </div>
+
+    <div class="muted" style="margin-top:10px">
+      Tips: kebobolan? besok targetkan total lebih kecil supaya nutup.
+    </div>
+  </div>
+
+  <div class="card">
+    <h1>Riwayat Harian</h1>
+    <div class="muted">Klik baris untuk edit data hari itu.</div>
+
+    <div style="height:10px"></div>
+
+    <table>
+      <thead>
+        <tr>
+          <th>Tanggal</th>
+          <th>Budget</th>
+          <th>Total</th>
+          <th>Sisa</th>
+          <th>Status</th>
+        </tr>
+      </thead>
+      <tbody id="tbody">
+        <tr><td colspan="5" class="muted">Belum ada data.</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<script>
+  // ---------- Utils ----------
+  const rupiah = (x) => new Intl.NumberFormat('id-ID').format(Number(x||0));
+  const n = (x) => {
+    const v = Number(x);
+    return Number.isFinite(v) ? v : 0;
+  };
+  const todayISO = () => {
+    const d = new Date();
+    const off = d.getTimezoneOffset();
+    return new Date(d.getTime() - off*60000).toISOString().slice(0,10);
+  };
+  const monthKey = (dateISO) => (dateISO||"").slice(0,7);
+
+  // ---------- Storage ----------
+  // data shape: { defaultBudget, entries: { "YYYY-MM-DD": {date,budget,makan,bensin,pulsa,kuliah,jajan,total,sisa} } }
+  const KEY = "budget_tracker_v1";
+  function loadStore(){
+    const raw = localStorage.getItem(KEY);
+    if(!raw){
+      return { defaultBudget: 105000, entries: {} };
+    }
+    try { return JSON.parse(raw); } catch { return { defaultBudget: 105000, entries: {} }; }
+  }
+  function saveStore(store){
+    localStorage.setItem(KEY, JSON.stringify(store));
+  }
+
+  // ---------- DOM ----------
+  const el = (id) => document.getElementById(id);
+
+  const defaultBudgetEl = el("defaultBudget");
+  const monthPickEl = el("monthPick");
+
+  const dateEl = el("date");
+  const budgetEl = el("budget");
+  const makanEl = el("makan");
+  const bensinEl = el("bensin");
+  const pulsaEl = el("pulsa");
+  const kuliahEl = el("kuliah");
+  const jajanEl = el("jajan");
+
+  const kpiTotalEl = el("kpiTotal");
+  const kpiSisaEl = el("kpiSisa");
+  const statusBadgeEl = el("statusBadge");
+  const modeTextEl = el("modeText");
+
+  const monthTotalEl = el("monthTotal");
+  const monthAvgEl = el("monthAvg");
+  const monthTopEl = el("monthTop");
+
+  const tbodyEl = el("tbody");
+
+  const saveBtn = el("saveBtn");
+  const resetBtn = el("resetBtn");
+  const deleteBtn = el("deleteBtn");
+  const exportBtn = el("exportBtn");
+  const clearAllBtn = el("clearAllBtn");
+
+  // ---------- State ----------
+  let store = loadStore();
+  let selectedDate = null;
+
+  // init inputs
+  defaultBudgetEl.value = store.defaultBudget ?? 105000;
+  dateEl.value = todayISO();
+  monthPickEl.value = monthKey(todayISO());
+
+  function setFormDefaults(){
+    selectedDate = null;
+    modeTextEl.textContent = "Tambah";
+    deleteBtn.style.display = "none";
+
+    const d = dateEl.value || todayISO();
+    budgetEl.value = store.defaultBudget ?? 105000;
+
+    makanEl.value = 0;
+    bensinEl.value = 0;
+    pulsaEl.value = 0;
+    kuliahEl.value = 0;
+    jajanEl.value = 0;
+
+    computeKPI();
+  }
+
+  function loadEntryToForm(dateISO){
+    const e = store.entries[dateISO];
+    if(!e) return;
+
+    selectedDate = dateISO;
+    modeTextEl.textContent = "Edit";
+    deleteBtn.style.display = "inline-block";
+
+    dateEl.value = e.date;
+    budgetEl.value = e.budget;
+
+    makanEl.value = e.makan;
+    bensinEl.value = e.bensin;
+    pulsaEl.value = e.pulsa;
+    kuliahEl.value = e.kuliah;
+    jajanEl.value = e.jajan;
+
+    computeKPI();
+  }
+
+  function computeKPI(){
+    const budget = n(budgetEl.value);
+    const total = n(makanEl.value)+n(bensinEl.value)+n(pulsaEl.value)+n(kuliahEl.value)+n(jajanEl.value);
+    const sisa = budget - total;
+
+    kpiTotalEl.textContent = "Rp" + rupiah(total);
+    kpiSisaEl.textContent = "Rp" + rupiah(sisa);
+
+    const bad = sisa < 0;
+    statusBadgeEl.textContent = bad ? "KEBOBOLAN" : "AMAN";
+    statusBadgeEl.className = "badge " + (bad ? "bad" : "ok");
+    kpiSisaEl.className = "kpi " + (bad ? "badTxt" : "okTxt");
+  }
+
+  function saveEntry(){
+    const date = dateEl.value;
+    if(!date){ alert("Tanggal wajib diisi"); return; }
+
+    const budget = n(budgetEl.value);
+    const makan = n(makanEl.value);
+    const bensin = n(bensinEl.value);
+    const pulsa = n(pulsaEl.value);
+    const kuliah = n(kuliahEl.value);
+    const jajan = n(jajanEl.value);
+
+    const total = makan+bensin+pulsa+kuliah+jajan;
+    const sisa = budget-total;
+
+    store.entries[date] = { date, budget, makan, bensin, pulsa, kuliah, jajan, total, sisa };
+    saveStore(store);
+
+    // auto switch filter month to saved entry month
+    monthPickEl.value = monthKey(date);
+    render();
+    loadEntryToForm(date);
+  }
+
+  function deleteEntry(){
+    const date = dateEl.value;
+    if(!date) return;
+    if(!store.entries[date]) return;
+    if(!confirm("Hapus data tanggal " + date + "?")) return;
+
+    delete store.entries[date];
+    saveStore(store);
+    render();
+    setFormDefaults();
+  }
+
+  function render(){
+    // render table by selected month
+    const mk = monthPickEl.value || monthKey(todayISO());
+    const all = Object.values(store.entries || {});
+    const rows = all
+      .filter(e => monthKey(e.date) === mk)
+      .sort((a,b) => (a.date < b.date ? 1 : -1));
+
+    // table
+    tbodyEl.innerHTML = "";
+    if(rows.length === 0){
+      const tr = document.createElement("tr");
+      tr.innerHTML = `<td colspan="5" class="muted">Belum ada data bulan ini.</td>`;
+      tbodyEl.appendChild(tr);
+    } else {
+      rows.forEach(e => {
+        const bad = (e.sisa ?? 0) < 0;
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+          <td>${e.date}</td>
+          <td>Rp${rupiah(e.budget)}</td>
+          <td>Rp${rupiah(e.total)}</td>
+          <td style="color:${bad ? "var(--bad)" : "var(--ok)"}">Rp${rupiah(e.sisa)}</td>
+          <td><span class="badge ${bad ? "bad" : "ok"}">${bad ? "KEBOBOLAN" : "AMAN"}</span></td>
+        `;
+        tr.addEventListener("click", () => loadEntryToForm(e.date));
+        tbodyEl.appendChild(tr);
+      });
+    }
+
+    // month summary
+    const sum = rows.reduce((acc,e)=>{
+      acc.total += n(e.total);
+      acc.makan += n(e.makan);
+      acc.bensin += n(e.bensin);
+      acc.pulsa += n(e.pulsa);
+      acc.kuliah += n(e.kuliah);
+      acc.jajan += n(e.jajan);
+      return acc;
+    }, {total:0,makan:0,bensin:0,pulsa:0,kuliah:0,jajan:0});
+
+    monthTotalEl.textContent = "Rp" + rupiah(sum.total);
+    monthAvgEl.textContent = "Rp" + rupiah(rows.length ? Math.round(sum.total/rows.length) : 0);
+
+    const cats = [
+      ["MAKAN", sum.makan],
+      ["BENSIN", sum.bensin],
+      ["PULSA", sum.pulsa],
+      ["KULIAH", sum.kuliah],
+      ["JAJAN", sum.jajan],
+    ].sort((a,b)=>b[1]-a[1])[0];
+
+    monthTopEl.textContent = rows.length ? `${cats[0]} (Rp${rupiah(cats[1])})` : "-";
+  }
+
+  function exportCSV(){
+    const mk = monthPickEl.value || monthKey(todayISO());
+    const rows = Object.values(store.entries || {})
+      .filter(e => monthKey(e.date) === mk)
+      .sort((a,b)=> (a.date > b.date ? 1 : -1));
+
+    if(rows.length === 0){ alert("Tidak ada data di bulan ini."); return; }
+
+    const header = ["date","budget","makan","bensin","pulsa","kuliah","jajan","total","sisa"];
+    const lines = [header.join(",")].concat(
+      rows.map(e => header.map(k => String(e[k] ?? 0)).join(","))
+    );
+    const blob = new Blob([lines.join("\n")], {type:"text/csv;charset=utf-8;"});
+    const url = URL.createObjectURL(blob);
+
+    const a = document.createElement("a");
+    a.href = url;
+    a.download = `budget_${mk}.csv`;
+    document.body.appendChild(a);
+    a.click();
+    a.remove();
+    URL.revokeObjectURL(url);
+  }
+
+  // ---------- Events ----------
+  [budgetEl, makanEl, bensinEl, pulsaEl, kuliahEl, jajanEl].forEach(x => {
+    x.addEventListener("input", computeKPI);
+  });
+
+  defaultBudgetEl.addEventListener("change", () => {
+    store.defaultBudget = n(defaultBudgetEl.value);
+    saveStore(store);
+    if(!selectedDate) budgetEl.value = store.defaultBudget;
+    computeKPI();
+  });
+
+  monthPickEl.addEventListener("change", render);
+
+  saveBtn.addEventListener("click", saveEntry);
+  resetBtn.addEventListener("click", () => { setFormDefaults(); });
+  deleteBtn.addEventListener("click", deleteEntry);
+
+  exportBtn.addEventListener("click", exportCSV);
+
+  clearAllBtn.addEventListener("click", () => {
+    if(!confirm("Yakin hapus semua data?")) return;
+    store = { defaultBudget: n(defaultBudgetEl.value) || 105000, entries: {} };
+    saveStore(store);
+    render();
+    setFormDefaults();
+  });
+
+  // ---------- Init ----------
+  // init budget to default
+  budgetEl.value = store.defaultBudget ?? 105000;
+  computeKPI();
+  render();
+</script>
+</body>
+</html>
